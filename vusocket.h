@@ -11,6 +11,8 @@
 
 #include <iostream>
 
+//#define _WIN32
+
 #ifdef _WIN32
     /* See http://stackoverflow.com/questions/12765743/getaddrinfo-on-win32 */
     #ifndef _WIN32_WINNT
@@ -25,6 +27,33 @@
     #include <netdb.h>  /* Needed for getaddrinfo() and freeaddrinfo() */
     #include <unistd.h> /* Needed for close() */
     #include <errno.h>
+
+    #define BUF_SIZE 500
+
+    void getaddr(){
+        struct addrinfo hints;
+        struct addrinfo *result, *rp;
+        int sfd, s, j;
+        size_t len;
+        ssize_t nread;
+        char buf[BUF_SIZE];
+
+        /* Obtain address(es) matching host/port */
+
+        memset(&hints, 0, sizeof(struct addrinfo));
+        hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+        hints.ai_socktype = SOCK_DGRAM; /* Datagram socket */
+        hints.ai_flags = 0;
+        hints.ai_protocol = 0;          /* Any protocol */
+
+        s = getaddrinfo(argv[1], argv[2], &hints, &result);
+        if (s != 0) {
+            fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
+            exit(EXIT_FAILURE);
+        }
+    }
+
+
     typedef int SOCKET;
     #define INVALID_SOCKET (SOCKET (~0))
     #define SOCKET_ERROR (-1)

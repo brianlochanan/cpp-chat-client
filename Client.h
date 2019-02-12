@@ -81,6 +81,8 @@ private:
     }
 
 public:
+    Client(SOCKET sock);
+
     inline ~Client() override {
         closeSocket();
         stopThreads();
