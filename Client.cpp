@@ -18,7 +18,19 @@ int Client::readFromSocket() {
 }
 
 void Client::createSocketAndLogIn() {
+    // initialize the socket
     sock_init();
+
+    // create the socket (domain(ipv4), type(tcp), protocol(0/IP))
+    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+
+    // check if the socket is valid
+    sock_valid(sock);
+
+    // link an IP adress to the socket
+
+
+
 }
 
 void Client::closeSocket() {
