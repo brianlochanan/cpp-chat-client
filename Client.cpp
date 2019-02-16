@@ -33,11 +33,11 @@ void Client::createSocketAndLogIn() {
     hints.ai_socktype = SOCK_STREAM; // SOCK_DGRAM
     hints.ai_flags = 0; //? voor de send function
 
+    //get address of server
+    status = getaddrinfo("52.58.97.202", "5378", &hints, &res);
+
     char *message;
     while (true){
-
-        //get address of server
-        status = getaddrinfo("52.58.97.202", "5378", &hints, &res);
 
         // create socket
         int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
@@ -49,46 +49,53 @@ void Client::createSocketAndLogIn() {
         // connect socket with server
         int conn = connect(sockfd, res->ai_addr, res->ai_addrlen);
 
-        // after connection free up memory
-        freeaddrinfo(res);
-
         // input name
         string str;
         cout << "Input your name: " << endl;
         cin >> str;
 
         if (str == "!quit"){
+            // after connection free up memory
+            freeaddrinfo(res);
+
+            //close socket
+            sock_close(sockfd);
+            sock_quit();
             exit(1);
         }
 
         else{
             // send message to server
-
             string result;
             if(str == "!who"){
+                result = "HELLO-FROM testServer\n";
+                recvFromServer(result, sockfd, res);
+
                 result = "WHO\n";
+                recvFromServer(result, sockfd, res);
             }
             else{
                 message = "HELLO-FROM ";
                 result = message + str + "\n";
+                recvFromServer(result, sockfd, res);
             }
-
-            const char *message = result.c_str();
-
-            int length = strlen(message);
-
-            cout << "result: " << result;
-
-            ssize_t sent = send(sockfd, message, length, res->ai_flags);
-            cout << "Client: " << result << endl;
-
-            // receive message from server
-            char buf[512];
-
-            ssize_t recvServer = recv(sockfd, buf, sizeof(buf), res->ai_flags);
-            cout << "Server: " << buf << endl;
         }
     }
+}
+
+
+void Client::recvFromServer(string result, int sockfd, addrinfo *res){
+    const char *message = result.c_str();
+
+    int length = strlen(message);
+
+    send(sockfd, message, length, res->ai_flags);
+    cout << "Client: " << result << endl;
+
+    // receive message from server
+    char buf[512];
+    recv(sockfd, buf, sizeof(buf), res->ai_flags);
+    cout << "Server: " << buf << endl;
 }
 
 void Client::closeSocket() {

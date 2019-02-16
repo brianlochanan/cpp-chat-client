@@ -16,6 +16,8 @@
 #include "vusocket.h"
 #include "CircularLineBuffer.h"
 
+using namespace std;
+
 class Client : public Application {
 private:
     /**
@@ -65,7 +67,13 @@ private:
         }
     }
 
+//    int connect (int sockfd, const struct sockaddr *servaddr, socklen_t addrlen){
+//        return 0;
+//    }
+
     void createSocketAndLogIn();
+
+    void recvFromServer(string result, int sockfd, addrinfo *res);
 
     void closeSocket();
 
