@@ -5,6 +5,8 @@
 #include <sys/proc_info.h>
 #include "Client.h"
 
+#define PORT 5378
+
 using namespace std;
 
 void Client::tick() {
@@ -20,38 +22,85 @@ int Client::readFromSocket() {
 }
 
 void Client::createSocketAndLogIn() {
-
-    // initialize the socket
     sock_init();
 
-    // create the socket (domain(ipv4), type(tcp), protocol(0/IP))
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
-    cout << "creating socket with return value: " << sock << endl;
+    int status;
+    struct addrinfo hints, *res;
+    struct addrinfo *servinfo;
 
-    // check if the socket is valid
-    sock_valid(sock);
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_INET; // AF_UNSPEC
+    hints.ai_socktype = SOCK_STREAM; // SOCK_DGRAM
+    hints.ai_flags = 0; //? voor de send function
 
-    // link an IP adress to the socket
-   struct addrinfo hint;
-   struct addrinfo *results;
-   //int info;
+    char *message;
+    while (true){
 
-   hint.ai_family = AF_INET; // AF_UNSPEC
-   hint.ai_socktype = SOCK_STREAM; // SOCK_DGRAM
-   hint.ai_protocol = 0;
+        //get address of server
+        status = getaddrinfo("52.58.97.202", "5378", &hints, &res);
 
-    int test  = getaddrinfo("52.58.97.202", "5378", &hint, &results);
+        // create socket
+        int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
-    //(connect(sock, (struct addrinfo *)results, sizeof(results)));
+        if (!sock_valid(sockfd)) {
+            cout << "Creating socket failed" << endl;
+        };
 
-  //  addrinfo client;
-//    int size = sizeof(client);
+        // connect socket with server
+        int conn = connect(sockfd, res->ai_addr, res->ai_addrlen);
 
+        // after connection free up memory
+        freeaddrinfo(res);
 
+        // input name
+        string str;
+        cout << "Input your name: " << endl;
+        cin >> str;
+
+        if (str == "!quit"){
+            exit(1);
+        }
+
+        else{
+            // send message to server
+
+            string result;
+            if(str == "!who"){
+                result = "WHO\n";
+            }
+            else{
+                message = "HELLO-FROM ";
+                result = message + str + "\n";
+            }
+
+            const char *message = result.c_str();
+
+            int length = strlen(message);
+
+            cout << "result: " << result;
+
+            ssize_t sent = send(sockfd, message, length, res->ai_flags);
+            cout << "Client: " << result << endl;
+
+            // receive message from server
+            char buf[512];
+
+            ssize_t recvServer = recv(sockfd, buf, sizeof(buf), res->ai_flags);
+            cout << "Server: " << buf << endl;
+        }
+    }
 }
 
 void Client::closeSocket() {
+    int status = 0;
 
+#ifdef _WIN32
+    status = shutdown(sock, SD_BOTH);
+    if (status == 0) { status = closesocket(sock); }
+#else
+    status = shutdown(sock, SHUT_RDWR);
+    if (status == 0) { status = close(sock); }
+#endif
 }
 
 Client::Client(SOCKET sock) : sock(sock) {
