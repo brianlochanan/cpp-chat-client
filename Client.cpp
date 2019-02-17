@@ -5,7 +5,8 @@
 #include <sys/proc_info.h>
 #include "Client.h"
 
-#define PORT 5378
+#define PORT "5378"
+#define SERVER_IP "52.58.97.202"
 
 using namespace std;
 
@@ -29,14 +30,15 @@ void Client::createSocketAndLogIn() {
     struct addrinfo *servinfo;
 
     memset(&hints, 0, sizeof hints);
+
     hints.ai_family = AF_INET; // AF_UNSPEC
     hints.ai_socktype = SOCK_STREAM; // SOCK_DGRAM
     hints.ai_flags = 0; //? voor de send function
 
     //get address of server
-    status = getaddrinfo("52.58.97.202", "5378", &hints, &res);
+    status = getaddrinfo(SERVER_IP, PORT, &hints, &res);
 
-    char *message;
+    int counter = 0;
     while (true){
 
         // create socket
@@ -49,7 +51,7 @@ void Client::createSocketAndLogIn() {
         // connect socket with server
         int conn = connect(sockfd, res->ai_addr, res->ai_addrlen);
 
-        // input name
+        // user input for sending client message
         string str;
         cout << "Input your name: " << endl;
         cin >> str;
@@ -67,15 +69,22 @@ void Client::createSocketAndLogIn() {
         else{
             // send message to server
             string result;
+
+            // gets whois online
             if(str == "!who"){
-                result = "HELLO-FROM testServer\n";
+                // first call HELLO-FROM <name>\n, because otherwise WHO\n doesn't work
+                // add number at the end of the client string, because then you can call !who again
+                std::string number = std::to_string(counter++);
+                result = "HELLO-FROM testClient" + number + "\n";
                 recvFromServer(result, sockfd, res);
 
                 result = "WHO\n";
                 recvFromServer(result, sockfd, res);
             }
+
+            // make unique user
             else{
-                message = "HELLO-FROM ";
+                char *message = "HELLO-FROM ";
                 result = message + str + "\n";
                 recvFromServer(result, sockfd, res);
             }
@@ -83,12 +92,19 @@ void Client::createSocketAndLogIn() {
     }
 }
 
-
+/**
+ * Client sends a message and receives one back from the server
+ * @param result
+ * @param sockfd
+ * @param res
+ */
 void Client::recvFromServer(string result, int sockfd, addrinfo *res){
+    // make a const char of the string, because send function expects a char as message
     const char *message = result.c_str();
 
     int length = strlen(message);
 
+    // send client message to server
     send(sockfd, message, length, res->ai_flags);
     cout << "Client: " << result << endl;
 
