@@ -1,5 +1,5 @@
 //
-// Created by Brian Lochan on 2019-02-11.
+// Brian Lochan, Kubra Kasirga
 //
 
 #include <sys/proc_info.h>
