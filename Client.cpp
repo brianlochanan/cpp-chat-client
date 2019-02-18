@@ -23,17 +23,20 @@ int Client::readFromSocket() {
 }
 
 void Client::createSocketAndLogIn() {
-    sock_init();
 
+    sock_init(); // initialize socket
+
+    // declare variables
     int status;
     struct addrinfo hints, *res;
-    struct addrinfo *servinfo;
+    struct addrinfo *info;
 
+    // set hints on 0
     memset(&hints, 0, sizeof hints);
 
-    hints.ai_family = AF_INET; // AF_UNSPEC
-    hints.ai_socktype = SOCK_STREAM; // SOCK_DGRAM
-    hints.ai_flags = 0; //? voor de send function
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = 0;
 
     //get address of server
     status = getaddrinfo(SERVER_IP, PORT, &hints, &res);
@@ -50,6 +53,7 @@ void Client::createSocketAndLogIn() {
 
         // connect socket with server
         int conn = connect(sockfd, res->ai_addr, res->ai_addrlen);
+
 
         // user input for sending client message
         string str;
@@ -70,9 +74,8 @@ void Client::createSocketAndLogIn() {
             // send message to server
             string result;
 
-            // gets whois online
+            // gets who is online
             if(str == "!who"){
-                // first call HELLO-FROM <name>\n, because otherwise WHO\n doesn't work
                 // add number at the end of the client string, because then you can call !who again
                 std::string number = std::to_string(counter++);
                 result = "HELLO-FROM testClient" + number + "\n";
