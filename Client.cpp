@@ -42,7 +42,6 @@ void Client::createSocketAndLogIn() {
     status = getaddrinfo(SERVER_IP, PORT, &hints, &res);
 
     int counter = 0;
-    while (true){
 
         // create socket
         int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
@@ -54,7 +53,6 @@ void Client::createSocketAndLogIn() {
         // connect socket with server
         int conn = connect(sockfd, res->ai_addr, res->ai_addrlen);
 
-
         // user input for sending client message
         string str;
         cout << "Input your name: " << endl;
@@ -63,36 +61,52 @@ void Client::createSocketAndLogIn() {
         if (str == "!quit"){
             // after connection free up memory
             freeaddrinfo(res);
-
             //close socket
             sock_close(sockfd);
             sock_quit();
-            exit(1);
+            Application::stopApplication();
         }
 
         else{
             // send message to server
             string result;
 
-            // gets who is online
-            if(str == "!who"){
-                // add number at the end of the client string, because then you can call !who again
-                std::string number = std::to_string(counter++);
-                result = "HELLO-FROM testClient" + number + "\n";
-                recvFromServer(result, sockfd, res);
-
-                result = "WHO\n";
-                recvFromServer(result, sockfd, res);
-            }
-
             // make unique user
-            else{
                 char *message = "HELLO-FROM ";
                 result = message + str + "\n";
-                recvFromServer(result, sockfd, res);
+                bool check = recvFromServer(result, sockfd, res, str);
+                if(!check) {
+                    cout << "Input your name: " << endl;
+                    cin >> str;
+                    result = message + str + "\n";
+                    recvFromServer(result, sockfd, res, str);
+                }
+
+            else {
+
+                while (true) {
+                    // gets who is online
+                    string command;
+                    cout << "Type a command: " << endl;
+                    cin >> command;
+//                    getline(cin, command);
+
+                    if(command == "!who"){
+                        string who = "WHO\n";
+                        recvFromServer(who, sockfd, res, str);
+                    }
+                    else  {
+                        // after connection free up memory
+                        freeaddrinfo(res);
+                        //close socket
+                        sock_close(sockfd);
+                        sock_quit();
+                        Application::stopApplication();
+                    }
             }
+            }
+
         }
-    }
 }
 
 /**
@@ -101,7 +115,7 @@ void Client::createSocketAndLogIn() {
  * @param sockfd
  * @param res
  */
-void Client::recvFromServer(string result, int sockfd, addrinfo *res){
+bool Client::recvFromServer(string result, int sockfd, addrinfo *res, string str){
     // make a const char of the string, because send function expects a char as message
     const char *message = result.c_str();
 
@@ -114,7 +128,19 @@ void Client::recvFromServer(string result, int sockfd, addrinfo *res){
     // receive message from server
     char buf[512];
     recv(sockfd, buf, sizeof(buf), res->ai_flags);
-    cout << "Server: " << buf << endl;
+
+    if (strncmp("IN-USE\n", buf, 6) == 0) {
+        cout << "Username \"" << str <<  "\" in use. Choose another username. "<< endl;
+        return false;
+    }
+    else {
+        cout << "Server: " << buf << endl;
+        return true;
+    }
+}
+
+void Client::closeSocket() {
+
 }
 
 

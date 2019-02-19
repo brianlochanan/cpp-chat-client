@@ -67,13 +67,10 @@ private:
         }
     }
 
-//    int connect (int sockfd, const struct sockaddr *servaddr, socklen_t addrlen){
-//        return 0;
-//    }
 
     void createSocketAndLogIn();
 
-    void recvFromServer(string result, int sockfd, addrinfo *res);
+    bool recvFromServer(string result, int sockfd, addrinfo *res,  string str);
 
     void closeSocket();
 
