@@ -52,11 +52,14 @@ void Client::createSocketAndLogIn() {
 
         // connect socket with server
         int conn = connect(sockfd, res->ai_addr, res->ai_addrlen);
+        if (conn <= -1) {
+            cout << "Connection to server failed" << endl;
+        }
 
-        // user input for sending client message
+        // username for first handshake to server
         string str;
         cout << "Input your name: " << endl;
-        cin >> str;
+        getline(cin, str);
 
         if (str == "!quit"){
             // after connection free up memory
@@ -70,43 +73,48 @@ void Client::createSocketAndLogIn() {
         else{
             // send message to server
             string result;
-
             // make unique user
                 char *message = "HELLO-FROM ";
                 result = message + str + "\n";
                 bool check = recvFromServer(result, sockfd, res, str);
+
                 if(!check) {
                     cout << "Input your name: " << endl;
-                    cin >> str;
+                    getline(cin, str);
                     result = message + str + "\n";
                     recvFromServer(result, sockfd, res, str);
                 }
 
-            else {
-
-                while (true) {
-                    // gets who is online
+                while(true) {
                     string command;
                     cout << "Type a command: " << endl;
-                    cin >> command;
-//                    getline(cin, command);
 
-                    if(command == "!who"){
-                        string who = "WHO\n";
-                        recvFromServer(who, sockfd, res, str);
-                    }
-                    else  {
-                        // after connection free up memory
-                        freeaddrinfo(res);
-                        //close socket
-                        sock_close(sockfd);
-                        sock_quit();
-                        Application::stopApplication();
-                    }
-            }
-            }
+                   getline(cin, command);
+                   cout << " whole message" << command << endl;
 
-        }
+                        if(command == "!who"){
+                            string who = "WHO\n";
+                            recvFromServer(who, sockfd, res, str);
+                        }
+
+                        else if(command.at(0) == '@') {
+                            // remove first character '@' and concatenate everything together
+                            result = "SEND " + command.substr(1) + "\n";
+                            //cout << "thisss" << result << endl;
+                            recvFromServer(result, sockfd, res, str);
+                            recvFromServer(result, sockfd, res, str);
+                        }
+                        else if (command == "!quit")  {
+                            // after connection free up memory
+                            freeaddrinfo(res);
+                            //close socket
+                            sock_close(sockfd);
+                            sock_quit();
+                            Application::stopApplication();
+                            exit(1);
+                        }
+                }
+            }
 }
 
 /**
