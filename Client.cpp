@@ -90,8 +90,6 @@ void Client::createSocketAndLogIn() {
                     cout << "Type a command: " << endl;
 
                    getline(cin, command);
-                   cout << " whole message" << command << endl;
-
                         if(command == "!who"){
                             string who = "WHO\n";
                             recvFromServer(who, sockfd, res, str);
@@ -101,8 +99,10 @@ void Client::createSocketAndLogIn() {
                             // remove first character '@' and concatenate everything together
                             result = "SEND " + command.substr(1) + "\n";
                             //cout << "thisss" << result << endl;
-                            recvFromServer(result, sockfd, res, str);
-                            recvFromServer(result, sockfd, res, str);
+                            string a;
+                           recvFromServer(result, sockfd, res, str);
+                           // uncommenting second one shows the message from the server
+                           // recvFromServer(result, sockfd, res, str);
                         }
                         else if (command == "!quit")  {
                             // after connection free up memory
