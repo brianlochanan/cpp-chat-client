@@ -74,6 +74,8 @@ private:
 
     void closeSocket();
 
+    void connectToServer(int sockfd, addrinfo *res);
+
     inline void startThreads() {
         socketThread = std::thread(&Client::threadReadFromSocket, this);
         stdinThread = std::thread(&Client::threadReadFromStdin, this);
