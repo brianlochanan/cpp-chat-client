@@ -149,7 +149,7 @@ bool Client::recvFromServer(string result, int sockfd, addrinfo *res, string use
 
         string receive;
 
-        cout << "Would you like to receive the message back that you sent? y/n";
+        cout << "Would you like to receive the message back that you sent? y/n" << endl;
         getline(cin, receive);
 
         if(receive == "y"){
