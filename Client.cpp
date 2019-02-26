@@ -10,8 +10,44 @@
 
 using namespace std;
 
+// declare variables
+string command;
+struct addrinfo hints, *res;
+struct addrinfo *info;
+bool check = false;
+string username;
+int sockfd;
+string result;
+
 void Client::tick() {
 
+    cout << "Type a command: " << endl;
+
+    getline(cin, command);
+
+    // see who is online
+    if (command == "!who") {
+        string who = "WHO\n";
+        recvFromServer(who, sockfd, res, username);
+    }
+
+        // send message to user
+    else if (command.at(0) == '@') {
+        // remove first character '@' and concatenate everything together
+        result = "SEND " + command.substr(1) + "\n";
+
+        recvFromServer(result, sockfd, res, username);
+    }
+
+        // stop the application
+    else if (command == "!quit") {
+        // after connection free up memory
+        freeaddrinfo(res);
+        //close socket
+        sock_close(sockfd);
+        sock_quit();
+        this->stopApplication();
+    }
 }
 
 int Client::readFromStdin() {
@@ -26,10 +62,6 @@ void Client::createSocketAndLogIn() {
     // initialize socket
     sock_init();
 
-    // declare variables
-    struct addrinfo hints, *res;
-    struct addrinfo *info;
-
     // set hints on 0
     memset(&hints, 0, sizeof hints);
 
@@ -40,15 +72,8 @@ void Client::createSocketAndLogIn() {
     // get address of server
     int status = getaddrinfo(SERVER_IP, PORT, &hints, &res);
 
-    string result;
-
     // set message for sending to server
     char *message = "HELLO-FROM ";
-
-    // values needed for first handshake
-    bool check = false;
-    string username;
-    int sockfd;
 
     // create socket in while loop, because new connection must be made when something
     // faulty is sent as username e.g.: "!who"
@@ -79,38 +104,6 @@ void Client::createSocketAndLogIn() {
         check = recvFromServer(result, sockfd, res, username);
     }
 
-    // send command to server
-    while (true) {
-        string command;
-        cout << "Type a command: " << endl;
-
-        getline(cin, command);
-
-        // see who is online
-        if (command == "!who") {
-            string who = "WHO\n";
-            recvFromServer(who, sockfd, res, username);
-        }
-
-        // send message to user
-        else if (command.at(0) == '@') {
-            // remove first character '@' and concatenate everything together
-            result = "SEND " + command.substr(1) + "\n";
-
-            recvFromServer(result, sockfd, res, username);
-        }
-
-        // stop the application
-        else if (command == "!quit") {
-            // after connection free up memory
-            freeaddrinfo(res);
-            //close socket
-            sock_close(sockfd);
-            sock_quit();
-            this->stopApplication();
-            exit(1);
-        }
-    }
 
 }
 
@@ -139,23 +132,29 @@ bool Client::recvFromServer(string result, int sockfd, addrinfo *res, string use
     }
 
     else if (strncmp("BAD-RQST-BODY", buf, 6) == 0) {
-        cout << "Username \"" << username << "\" failed. Choose another username. " << endl;
+        cout << "Username \"" << username << "\" bad request body." << endl;
         return false;
     }
 
-    else if (strncmp("SEND-OK", buf, 6) == 0){
-        cout << "Server: " << buf << endl;
-        recv(sockfd, buf, sizeof(buf), res->ai_flags);
-
-        string receive;
-
-        cout << "Would you like to receive the message back that you sent? y/n" << endl;
-        getline(cin, receive);
-
-        if(receive == "y"){
-            cout << "Server: " << buf << endl;
-        }
+    else if(strncmp("UNKNOWN", buf, 6) == 0) {
+        cout << "Unknown username. try a valid username." << endl;
     }
+
+
+
+//    else if (strncmp("SEND-OK", buf, 6) == 0){
+//        cout << "Server: " << buf << endl;
+//        recv(sockfd, buf, sizeof(buf), res->ai_flags);
+//
+//        string receive;
+//
+//        cout << "Would you like to receive the message back that you sent? y/n" << endl;
+//        getline(cin, receive);
+//
+//        if(receive == "y"){
+//            cout << "Server: " << buf << endl;
+//        }
+//    }
 
     else {
         cout << "Client: " << result << endl;
