@@ -19,7 +19,9 @@ string username;
 int sockfd;
 string result;
 
-void Client::tick() {
+
+
+int Client::tick() {
 
     cout << "Type a command: " << endl;
 
@@ -47,6 +49,11 @@ void Client::tick() {
         sock_close(sockfd);
         sock_quit();
         this->stopApplication();
+        return -1;
+    }
+
+    else {
+        return 0;
     }
 }
 
@@ -142,19 +149,19 @@ bool Client::recvFromServer(string result, int sockfd, addrinfo *res, string use
 
 
 
-//    else if (strncmp("SEND-OK", buf, 6) == 0){
-//        cout << "Server: " << buf << endl;
-//        recv(sockfd, buf, sizeof(buf), res->ai_flags);
-//
-//        string receive;
-//
-//        cout << "Would you like to receive the message back that you sent? y/n" << endl;
-//        getline(cin, receive);
-//
-//        if(receive == "y"){
-//            cout << "Server: " << buf << endl;
-//        }
-//    }
+    else if (strncmp("SEND-OK", buf, 6) == 0){
+        cout << "Server: " << buf << endl;
+        recv(sockfd, buf, sizeof(buf), res->ai_flags);
+
+        string receive;
+
+        cout << "Would you like to receive the message back that you sent? y/n" << endl;
+        getline(cin, receive);
+
+        if(receive == "y"){
+            cout << "Server: " << buf << endl;
+        }
+    }
 
     else {
         cout << "Client: " << result << endl;

@@ -10,7 +10,7 @@ class Application {
 private:
     bool stop = false;
 
-    virtual void tick() = 0;
+    virtual int tick() = 0;
 
 public:
     virtual ~Application() = default;

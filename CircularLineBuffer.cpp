@@ -4,6 +4,14 @@
 
 #include "CircularLineBuffer.h"
 
+bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
+    return false;
+}
+
+std::string CircularLineBuffer::_readLine() {
+    return std::string();
+}
+
 int CircularLineBuffer::freeSpace() {
     return 0;
 }
@@ -26,12 +34,4 @@ int CircularLineBuffer::findNewline() {
 
 bool CircularLineBuffer::hasLine() {
     return false;
-}
-
-bool CircularLineBuffer::writeChars(const char *chars, size_t nchars) {
-    return false;
-}
-
-std::string CircularLineBuffer::readLine() {
-    return std::string();
 }
