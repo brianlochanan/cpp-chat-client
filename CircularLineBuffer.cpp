@@ -8,26 +8,39 @@ using namespace std;
 
 bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
 
-    // if freespace is less then the chars you want to write then it returns false.
-    if(nchars > freeSpace()){
+//    // if freespace is less then the chars you want to write then it returns false.
+//    if(nchars > freeSpace()){
+//        return false;
+//    }
+
+    if(freeSpace() == 0){
         return false;
     }
 
     int i = 0;
 
+    if(freeSpace() < nchars){
+        start = bufferSize - freeSpace();
+    }
+
     for (int j = nextFreeIndex(); j < (nchars + nextFreeIndex()); j++) {
+
+
         char endline = chars[i];
         endline += chars[i+1];
 
-
+        if(j == bufferSize){
+            j = 0;
+        }
         if(endline == '\n'){
             buffer[j] = '\n';
-            count = (--nchars + nextFreeIndex());
+            count++;
             return true;
         }
         else{
             buffer[j] = chars[i];
             i++;
+            count++;
         }
     }
     count = (nchars + nextFreeIndex());
@@ -36,19 +49,26 @@ bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
 
 std::string CircularLineBuffer::_readLine() {
     string line;
-    for (int i = start; i < count; ++i) {
-        line += buffer[i];
-        if(buffer[i] == '\n'){
+    for (int i = 0; i < count; i++) {
 
-            findNewline();
+        line += buffer[start];
+
+        if(buffer[start++] == '\n'){
+            count = count - start;
+
+//            findNewline();
             return std::string(line);
+        }
+
+        if(start == bufferSize){
+            start = 0;
         }
     }
     return std::string();
 }
 
 int CircularLineBuffer::freeSpace() {
-    return (bufferSize - strlen(buffer) + 1);
+    return (bufferSize - count);
 }
 
 bool CircularLineBuffer::isFull() {
@@ -67,6 +87,7 @@ bool CircularLineBuffer::isEmpty() {
 }
 
 int CircularLineBuffer::nextFreeIndex() {
+
     return strlen(buffer);
 }
 

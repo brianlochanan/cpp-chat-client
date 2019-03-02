@@ -74,14 +74,23 @@ void Client::createSocketAndLogIn() {
     const char *cstr = "HELLO\n"; //5
     bool test = buffer->writeChars(cstr, strlen(cstr));
 
+    if(test){
+        cout << "testhallo" << endl;
+    }
+
     const char *cstr2 = "TEST\n"; //10
-    buffer->writeChars(cstr2, strlen(cstr2));
+    if(buffer->writeChars(cstr2, strlen(cstr2))){
+        cout << "gfhddfhdf";
+    }
 
+
+    cout << "buffer->hasLine(): " << buffer->hasLine() << endl;
 
     cout << "test read from buffer: " << buffer->readLine() << endl;
-    cout << "has next line: " << buffer->hasLine() << endl;
 
     cout << "test read from buffer: " << buffer->readLine() << endl;
+
+
 
 //----------------------------------------------------------------------------------------------------------------------
 
