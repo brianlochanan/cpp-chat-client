@@ -37,7 +37,6 @@ int Client::tick() {
     else if (command.at(0) == '@') {
         // remove first character '@' and concatenate everything together
         result = "SEND " + command.substr(1) + "\n";
-
         recvFromServer(result, sockfd, res, username);
     }
 
@@ -66,6 +65,26 @@ int Client::readFromSocket() {
 }
 
 void Client::createSocketAndLogIn() {
+
+
+    //Circular buffer example
+    CircularLineBuffer* buffer = new CircularLineBuffer();
+
+    cout << "test empty: " << buffer->isEmpty() << endl;
+    const char *cstr = "HELLO\n"; //5
+    bool test = buffer->writeChars(cstr, strlen(cstr));
+
+    const char *cstr2 = "TEST\n"; //10
+    buffer->writeChars(cstr2, strlen(cstr2));
+
+
+    cout << "test read from buffer: " << buffer->readLine() << endl;
+    cout << "has next line: " << buffer->hasLine() << endl;
+
+    cout << "test read from buffer: " << buffer->readLine() << endl;
+
+//----------------------------------------------------------------------------------------------------------------------
+
     // initialize socket
     sock_init();
 
