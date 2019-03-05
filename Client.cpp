@@ -22,38 +22,38 @@ string result;
 
 
 int Client::tick() {
-
-    cout << "Type a command: " << endl;
-
-    getline(cin, command);
-
-    // see who is online
-    if (command == "!who") {
-        string who = "WHO\n";
-        recvFromServer(who, sockfd, res, username);
-    }
-
-        // send message to user
-    else if (command.at(0) == '@') {
-        // remove first character '@' and concatenate everything together
-        result = "SEND " + command.substr(1) + "\n";
-        recvFromServer(result, sockfd, res, username);
-    }
-
-        // stop the application
-    else if (command == "!quit") {
-        // after connection free up memory
-        freeaddrinfo(res);
-        //close socket
-        sock_close(sockfd);
-        sock_quit();
-        this->stopApplication();
-        return -1;
-    }
-
-    else {
-        return 0;
-    }
+//
+//    cout << "Type a command: " << endl;
+//
+//    getline(cin, command);
+//
+//    // see who is online
+//    if (command == "!who") {
+//        string who = "WHO\n";
+//        recvFromServer(who, sockfd, res, username);
+//    }
+//
+//        // send message to user
+//    else if (command.at(0) == '@') {
+//        // remove first character '@' and concatenate everything together
+//        result = "SEND " + command.substr(1) + "\n";
+//        recvFromServer(result, sockfd, res, username);
+//    }
+//
+//        // stop the application
+//    else if (command == "!quit") {
+//        // after connection free up memory
+//        freeaddrinfo(res);
+//        //close socket
+//        sock_close(sockfd);
+//        sock_quit();
+//        this->stopApplication();
+//        return -1;
+//    }
+//
+//    else {
+//        return 0;
+//    }
 }
 
 int Client::readFromStdin() {
@@ -71,84 +71,144 @@ void Client::createSocketAndLogIn() {
     CircularLineBuffer* buffer = new CircularLineBuffer();
 
     cout << "test empty: " << buffer->isEmpty() << endl;
-    const char *cstr = "HELLO\n"; //5
-    bool test = buffer->writeChars(cstr, strlen(cstr));
+//    const char *cstr = "HELLO\n"; //5
+//    bool test = buffer->writeChars(cstr, strlen(cstr));
+//
+//    if(test){
+//        cout << "testhallo" << endl;
+//    }
+//
+//    const char *cstr2 = "TEST\n"; //10
+//    if(buffer->writeChars(cstr2, strlen(cstr2))){
+//        cout << "gfhddfhdf";
+//    }
+//
+//    const char *cstr3 = "BRIAN\n"; //10
+//    if(buffer->writeChars(cstr3, strlen(cstr3))){
+//        cout << "gfhddfhdf2";
+//    }
 
-    if(test){
-        cout << "testhallo" << endl;
-    }
 
-    const char *cstr2 = "TEST\n"; //10
-    if(buffer->writeChars(cstr2, strlen(cstr2))){
-        cout << "gfhddfhdf";
-    }
+//    const char *a = "";
+//    bool hi = buffer->writeChars(a, strlen(a)); // write text to buffer ++
+//    cout << "writing " << a << "to buffer" << endl;
+//    cout << "readLine " << buffer->readLine() << endl;
 
-    const char *cstr3 = "BRIAN\n"; //10
-    if(buffer->writeChars(cstr3, strlen(cstr3))){
-        cout << "gfhddfhdf2";
-    }
+//    const char *cstr = "BUFFER\n"; //10
+//    bool test = buffer->writeChars(cstr, strlen(cstr)); // write text to buffer ++
+//    cout << "writing " << cstr << "to buffer" << endl;
+//    cout << "readLine " << buffer->readLine() << endl;
+//
+//    const char *cstr3 = "HAPPINES\n"; //10
+//    bool test3 = buffer->writeChars(cstr3, strlen(cstr)); // write text to buffer ++
+//    cout << "writing " << cstr3 << "to buffer" << endl;
+//    cout << "readLine " << buffer->readLine() << endl;
+
+//    const char *cstr4 = "KUBRAAAAAAA\n"; //10
+//    bool test4 = buffer->writeChars(cstr4, strlen(cstr)); // write text to buffer ++
+//    cout << "writing " << cstr4 << "to buffer" << endl;
+//    cout << "readLine " << buffer->readLine() << endl;
+
+
+
+    const char *a = "";
+    bool buf = buffer->writeChars(a, strlen(a));
+    cout << "\nwriting: '' to buffer" << endl;
+    cout << "isEmpty: " << buffer->isEmpty() << endl;
+    cout << "hasLine: " << buffer->hasLine() << endl;
+    cout << "findNewLine: " << buffer->findNewline() << endl;
+    cout << "freeSpace: " << buffer->freeSpace() << endl;
+    cout << "isFull: " << buffer->isFull() << endl;
+    cout << "nextFreeIndex: " << buffer->nextFreeIndex() << endl;
+//    cout << "readLine: " << buffer->readLine() << endl;
+
+    const char *b = "BUFFERS\n";
+    bool buf2 = buffer->writeChars(b, strlen(b));
+    cout << "\nwriting: 'BUFFERS' to buffer" << endl;
+    cout << "isEmpty: " << buffer->isEmpty() << endl;
+    cout << "hasLine: " << buffer->hasLine() << endl;
+    cout << "findNewLine: " << buffer->findNewline() << endl;
+    cout << "freeSpace: " << buffer->freeSpace() << endl;
+    cout << "isFull: " << buffer->isFull() << endl;
+    cout << "nextFreeIndex: " << buffer->nextFreeIndex() << endl;
+//    cout << "readLine: " << buffer->readLine() << endl;
+
+    const char *c = "HAPPINESSSSSSSSSSSSS\n";
+    bool buf3 = buffer->writeChars(c, strlen(c));
+    cout << "\nwriting: 'HAPPINESS' to buffer" << endl;
+    cout << "isEmpty: " << buffer->isEmpty() << endl;
+    cout << "hasLine: " << buffer->hasLine() << endl;
+    cout << "findNewLine: " << buffer->findNewline() << endl;
+    cout << "freeSpace: " << buffer->freeSpace() << endl;
+    cout << "isFull: " << buffer->isFull() << endl;
+    cout << "nextFreeIndex: " << buffer->nextFreeIndex() << endl;
+    cout << "readLine: " << buffer->readLine() << endl;
+
+
+
+
 
 //    const char *cstr4 = "HI\n"; //10
 //    if(buffer->writeChars(cstr4, strlen(cstr4))){
 //        cout << "gfhddfhdf2";
 //    }
 
-    cout << "buffer->findNewline(): " << buffer->findNewline() << endl;
+//    cout << "buffer->findNewline(): " << buffer->findNewline() << endl;
+//
+//    cout << "buffer->hasLine(): " << buffer->hasLine() << endl;
 
-    cout << "buffer->hasLine(): " << buffer->hasLine() << endl;
+//    cout << "test read from buffer: " << buffer->readLine() << endl;
 
-    cout << "test read from buffer: " << buffer->readLine() << endl;
-
-    cout << "test read from buffer: " << buffer->readLine() << endl;
+//    cout << "test read from buffer: " << buffer->readLine() << endl;
 
 
 
 //----------------------------------------------------------------------------------------------------------------------
 
     // initialize socket
-    sock_init();
-
-    // set hints on 0
-    memset(&hints, 0, sizeof hints);
-
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = 0;
-
-    // get address of server
-    int status = getaddrinfo(SERVER_IP, PORT, &hints, &res);
-
-    // set message for sending to server
-    char *message = "HELLO-FROM ";
-
-    // create socket in while loop, because new connection must be made when something
-    // faulty is sent as username e.g.: "!who"
-    while (!check) {
-        // create socket
-        sockfd = sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-
-        if (!sock_valid(sockfd)) {
-            cout << "Creating socket failed" << endl;
-        };
-
-        // connect socket with server
-        connectToServer(sockfd, res);
-
-        cout << "Input your name: " << endl;
-        getline(cin, username);
-
-        // check if typed "HELLO-FROM" in username
-        if (username.find(message) != std::string::npos) {
-            result = username + "\n";
-        }
-
-        else{
-            result = message + username + "\n";
-        }
-
-        // check if login to server is successful
-        check = recvFromServer(result, sockfd, res, username);
-    }
+//    sock_init();
+//
+//    // set hints on 0
+//    memset(&hints, 0, sizeof hints);
+//
+//    hints.ai_family = AF_INET;
+//    hints.ai_socktype = SOCK_STREAM;
+//    hints.ai_flags = 0;
+//
+//    // get address of server
+//    int status = getaddrinfo(SERVER_IP, PORT, &hints, &res);
+//
+//    // set message for sending to server
+//    char *message = "HELLO-FROM ";
+//
+//    // create socket in while loop, because new connection must be made when something
+//    // faulty is sent as username e.g.: "!who"
+//    while (!check) {
+//        // create socket
+//        sockfd = sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+//
+//        if (!sock_valid(sockfd)) {
+//            cout << "Creating socket failed" << endl;
+//        };
+//
+//        // connect socket with server
+//        connectToServer(sockfd, res);
+//
+//        cout << "Input your name: " << endl;
+//        getline(cin, username);
+//
+//        // check if typed "HELLO-FROM" in username
+//        if (username.find(message) != std::string::npos) {
+//            result = username + "\n";
+//        }
+//
+//        else{
+//            result = message + username + "\n";
+//        }
+//
+//        // check if login to server is successful
+//        check = recvFromServer(result, sockfd, res, username);
+//    }
 
 
 }

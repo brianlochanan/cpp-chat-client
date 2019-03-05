@@ -21,6 +21,11 @@ bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
 //        return false;
 //    }
 
+    // checks if size of characters is greater than what can be put inside the buffer.
+    if(nchars > bufferSize){
+        return false;
+    }
+
     // checks if the buffer is full.
     if(freeSpace() == 0){
         return false;
@@ -126,20 +131,15 @@ bool CircularLineBuffer::isFull() {
 }
 
 bool CircularLineBuffer::isEmpty() {
-
-    if(strlen(buffer) == 0){
-        return true;
-    }
-    return false;
+    return strlen(buffer) == 0;
 }
 
 int CircularLineBuffer::nextFreeIndex() {
-
     return newIndex;
 }
 
 int CircularLineBuffer::findNewline() {
-    for (int i = start; i < strlen(buffer); i++) {
+    for (int i = newIndex-1; i-1 < bufferSize; i++) {
         if(buffer[i] == '\n'){
             return i;
         }
@@ -148,18 +148,11 @@ int CircularLineBuffer::findNewline() {
 }
 
 bool CircularLineBuffer::hasLine() {
-//    for (int i = start; i < strlen(buffer); i++) {
-//        if(buffer[i] == '\n'){
-//            return true;
-//        }
-//    }
-//    return false;
-
-    //see what is in buffer
-    for (int i = 0; i < bufferSize; ++i) {
-        cout << buffer[i] << endl;
+    for (int i = 0; i < strlen(buffer); i++) {
+        if(buffer[i] == '\n'){
+            return true;
+        }
     }
-
-    return true;
+    return false;
 }
 
