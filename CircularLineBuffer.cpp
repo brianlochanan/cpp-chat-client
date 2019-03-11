@@ -102,7 +102,7 @@ std::string CircularLineBuffer::_readLine() {
         // through all of the lines again.
         if(buffer[start++] == '\n'){
             count = count - start;
-
+            line = line.substr(0, line.size() - 1); // remove the nextline character from message
             return std::string(line);
         }
 
@@ -148,7 +148,7 @@ int CircularLineBuffer::findNewline() {
 }
 
 bool CircularLineBuffer::hasLine() {
-    for (int i = 0; i < strlen(buffer); i++) {
+    for (int i = start; i < strlen(buffer); i++) {
         if(buffer[i] == '\n'){
             return true;
         }

@@ -18,46 +18,60 @@ bool check = false;
 string username;
 int sockfd;
 string result;
-
 CircularLineBuffer* buffer = new CircularLineBuffer();
+CircularLineBuffer* socketBuffer = new CircularLineBuffer();
 
 
 int Client::tick() {
 
-    cout << "Type a command: " << endl;
 
-    getline(cin, command);
+//    cout << "readLine: " << buffer->readLine() << endl;
 
-    // see who is online
-    if (command == "!who") {
-        string who = "WHO\n";
-        recvFromServer(who, sockfd, res, username);
+    if(stdinBuffer.hasLine()) {
+        cout << "so it has a line" << endl;
+      string command =  stdinBuffer.readLine();
+        cout << "1" << command << endl;
+
+        // see who is online
+        if (command == "!who") {
+            string who = "WHO\n";
+            recvFromServer(who, sockfd, res, username);
+        }
+
+            // send message to user
+        else if (command.at(0) == '@') {
+            // remove first character '@' and concatenate everything together
+            result = "SEND " + command.substr(1) + "\n";
+            recvFromServer(result, sockfd, res, username);
+        }
+
+            // stop the application
+        else if (command == "!quit") {
+            // after connection free up memory
+            freeaddrinfo(res);
+            //close socket
+            sock_close(sockfd);
+            sock_quit();
+            this->stopApplication();
+            return -1;
+        }
+        else {
+            readFromStdin();
+        }
+        cout << "2" << endl;
+        readFromStdin();
     }
-
-        // send message to user
-    else if (command.at(0) == '@') {
-        // remove first character '@' and concatenate everything together
-        result = "SEND " + command.substr(1) + "\n";
-        recvFromServer(result, sockfd, res, username);
-    }
-
-        // stop the application
-    else if (command == "!quit") {
-        // after connection free up memory
-        freeaddrinfo(res);
-        //close socket
-        sock_close(sockfd);
-        sock_quit();
-        this->stopApplication();
-        return -1;
-    }
-
-    else {
         return 0;
-    }
+
 }
 
 int Client::readFromStdin() {
+    cout << "Type a command: " << endl;
+    getline(cin, command);
+    command = command + "\n";
+    const char *message = command.c_str();
+    cout << "writing to buffer.." << endl;
+    stdinBuffer.writeChars(message, strlen(message));
     return 0;
 }
 

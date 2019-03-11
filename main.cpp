@@ -8,7 +8,7 @@ int main(int argc, char *argv[ ]) {
     Application* app = new Client(1);
     std::cout << "Setting up" << std::endl;
     app->setup();
-    std::cout << "Running application" << std::endl;
+//    std::cout << "Running application" << std::endl;
 
 
 
