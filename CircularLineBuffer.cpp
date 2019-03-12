@@ -6,10 +6,6 @@
 
 using namespace std;
 
-int newIndex = 0;
-
-string test;
-
 /**
  * Checks until '\n' is found and then writes to the buffer.
  * @param chars a line
@@ -18,77 +14,35 @@ string test;
  */
 bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
 
-//    // if freespace is less then the chars you want to write then it returns false.
-//    if(nchars > freeSpace()){
-//        return false;
-//    }
-
-
     // checks if size of characters is greater than what can be put inside the buffer.
-    if(nchars > bufferSize){
+    if(nchars > bufferSize-1){
         return false;
     }
 
-    // checks if the buffer is full.
+    // 1.1. checks if the buffer is full.
     if(freeSpace() == 0){
         return false;
     }
 
-    // declare an int to loop through the given line called, chars.
-    int i = 0;
+    int untilNext = nchars + nextFreeIndex();
+    for (int i = nextFreeIndex(); i < untilNext; i++) {
 
-    //
-    if(freeSpace() <= nchars){
-        start = bufferSize - freeSpace();
-        count = 0;
-    }
-
-    // set the start variable at the new index that has not been taken.
-    // Loop nchar times so that it can write the char.
-    for (int j = nextFreeIndex(); j < (nchars + nextFreeIndex()); j++) {
-        // check for '\n'.
-        char endline = chars[i];
-        endline += chars[i+1];
-
-        // circle through the buffer.
-        if(j == bufferSize){
-            j = 0;
+        // 1.2. extra check in case if the last character of buffer equals '\n' then take the next free space.
+        // This can be done, because the array is not full because we already checked for it in 1.1.
+        if(buffer[nextFreeIndex()] == '\n'){
+            ++i;
         }
+        buffer[i] += chars[i];
+        count++;
 
-        // return true when '\n' is found.
-        if(endline == '\n'){
-
-            // 1.1. sets the end character of the line to '\n', because you want '\n' only to take up one character.
-            buffer[j] = '\n';
-
-            // do another count + 1, because you don't go to the else again.
-            count++;
-
-            // 1.2. the new slot that has not been taken is j+1, because the last j is the '\n'. See comment 1.1.
-//            newIndex = j+1;
-
-            // check if the line that was the first in the line was overwritten. If yes then overwrite the start variable
-            // with the new start variable.
-
-            if(start <= j){
-                cout << "hdhf";
-                start = nextFreeIndex() - nchars;
-            }
-            return true;
-        }
-
-        // write chars to the buffer.
-        else{
-
-            buffer[j] = chars[i];
-//            cout << chars[i] << endl;
-
-            i++;
-
-            // count how many chars have been written to the buffer.
-            count++;
+        // circle through buffer.
+        if(i == bufferSize){
+            i = 0;
+            untilNext = untilNext - bufferSize-1;
         }
     }
+
+
     return true;
 }
 
@@ -99,34 +53,36 @@ bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
 std::string CircularLineBuffer::_readLine() {
     string line;
 
-    // loops through all the lines in the buffer, because of count.
-    for (int i = 0; i < count; i++) {
+    // assign the current start to the start that is now the current start.
+    int currentStart = start;
 
-        line += buffer[start];
+    // sum the count with the start, so that we can loop through the new start.
+    start += count;
 
-        // checks for the first line with '\n' and return the string. Also count updates, because you don't have to loop
-        // through all of the lines again.
-        if(buffer[start++] == '\n'){
-            count = count - start;
-//            line = line.substr(0, line.size() - 1); // remove the nextline character from message
-            return std::string(line);
-        }
+    // check the current start with the new start, so we can loop through the new array values.
+    for (int i = currentStart; i < start; i++) {
 
-        // find the next character in the buffer when it circles.
-        if(start == bufferSize){
-            start = 0;
+        // 2.2 do this before checking if the buffer is circular, because we must set the last character in the array
+        // and not skip it.
+        line += buffer[i];
+
+        // 2.1 check if the buffer is circular and set the value of i to 0, so that we can start from the beginning
+        // also set the start variable to the new beginning variable by start - bufferSize-1.
+        if(i == bufferSize){
+            i = 0;
+            start = start - bufferSize-1;
         }
     }
-    return std::string();
+    return std::string(line);
 }
 
 /**
- * Checks freespace through (bufferSize - the space that is free), So when you have only the sixth slot left and your
- * bufferSize = 7, then it returns 1, because 7-6=1.
+ * Checks freespace through (bufferSize-1 - the space that is free), So when you have only the sixth slot left and your
+ * bufferSize-1 = 7, then it returns 1, because 7-6=1.
  * @return
  */
 int CircularLineBuffer::freeSpace() {
-    return (bufferSize - nextFreeIndex());
+    return (bufferSize-1 - nextFreeIndex());
 }
 
 bool CircularLineBuffer::isFull() {
@@ -141,11 +97,11 @@ bool CircularLineBuffer::isEmpty() {
 }
 
 int CircularLineBuffer::nextFreeIndex() {
-    return start+count;
+    return (start+count);
 }
 
 int CircularLineBuffer::findNewline() {
-    for (int i = nextFreeIndex()-1; i-1 < bufferSize; i++) {
+    for (int i = nextFreeIndex(); i < bufferSize; i++) {
         if(buffer[i] == '\n'){
             return i;
         }
@@ -164,4 +120,3 @@ bool CircularLineBuffer::hasLine() {
     }
     return false;
 }
-

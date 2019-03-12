@@ -114,8 +114,8 @@ private:
     */
     void createSocketAndLogIn();
 
-    bool sendToServer(string result, int sockfd, addrinfo *res);
-    string recvFromServer(int sockfd, addrinfo *res,  string str);
+    bool recvFromServer(string result, int sockfd, addrinfo *res, string str);
+
 
     /**
      * Assignment 1

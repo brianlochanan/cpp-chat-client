@@ -11,80 +11,54 @@
 using namespace std;
 
 // declare variables
-bool firsTime = true;
 string command;
 struct addrinfo hints, *res;
 struct addrinfo *info;
-string check = "0";
+bool check = false;
 string username;
 int sockfd;
 string result;
+string sendCommand;
+
 CircularLineBuffer* stdinBuffer = new CircularLineBuffer();
-CircularLineBuffer* socketBuffer = new CircularLineBuffer();
-string serverRead;
+//CircularLineBuffer* socketBuffer = new CircularLineBuffer();
 
 int Client::tick() {
 
-    if(stdinBuffer.hasLine()) {
-        string command = stdinBuffer.readLine();
-        sendToServer(command, sockfd, res);
-        cout << command;
-    }
 
-    if(socketBuffer.hasLine()){
-        string command = socketBuffer.readLine();
-        cout << "socketBuffer.readLine():" << command << endl;
-    }
+    const char *writecharrs = "qwertyuiopasdfghjkl\n";
 
-    return 0;
+    stdinBuffer.writeChars(writecharrs, sizeof(writecharrs));
 
-}
+    string outcome = stdinBuffer.readLine();
+    cout << "outcome: " << outcome << endl;
 
-int Client::readFromSocket() {
-    string receiveServer = recvFromServer(sockfd, res, username);
-    const char *message = receiveServer.c_str();
 
-    cout << "writing to socketBuffer.." << endl;
-    socketBuffer.writeChars(message, strlen(message));
-    return 0;
-}
+    cout << "Type a command: " << endl;
+    getline(cin, command);
 
-int Client::readFromStdin() {
-    if(firsTime){
-        cout << "Type a username: " << endl;
-        command = "";
-        getline(cin, command);
-        username = command;
+    sendCommand = command + "\n";
+    const char *message = sendCommand.c_str();
+    cout << "::writing to buffer.." << message << endl;
+    stdinBuffer.writeChars(message, strlen(message));
+    string servercommand = stdinBuffer.readLine();
+    cout << "server command " << servercommand << endl;
+    servercommand = servercommand.substr(0, servercommand.size() - 1);
 
-        char *hellofromMessage = "HELLO-FROM ";
-
-        // check if typed "HELLO-FROM" in username
-        if (username.find(hellofromMessage) != std::string::npos) {
-            result = username + '\n';
-        }
-
-        else{
-            result = hellofromMessage + username + "\n";
-        }
-
-        firsTime = false;
-    }
-    else{
-        cout << "Type a command: " << endl;
-        command = "";
-        getline(cin, command);
-        command = command;
-    }
-
+    // see who is online
     if (command == "!who") {
-        result = "WHO\n";
+        string who = "WHO\n";
+        recvFromServer(who, sockfd, res, username);
     }
+
+        // send message to user
     else if (command.at(0) == '@') {
         // remove first character '@' and concatenate everything together
         result = "SEND " + command.substr(1) + "\n";
+        recvFromServer(result, sockfd, res, username);
     }
 
-    // stop the application
+        // stop the application
     else if (command == "!quit") {
         // after connection free up memory
         freeaddrinfo(res);
@@ -95,11 +69,18 @@ int Client::readFromStdin() {
         return -1;
     }
 
-    const char *message = result.c_str();
-    cout << "writing to stdinBuffer.." << endl;
-    stdinBuffer.writeChars(message, strlen(message));
+    else {
 
 
+        return 0;
+    }
+}
+
+int Client::readFromStdin() {
+    return 0;
+}
+
+int Client::readFromSocket() {
     return 0;
 }
 
@@ -118,6 +99,12 @@ void Client::createSocketAndLogIn() {
     // get address of server
     int status = getaddrinfo(SERVER_IP, PORT, &hints, &res);
 
+    // set message for sending to server
+    char *message = "HELLO-FROM ";
+
+    // create socket in while loop, because new connection must be made when something
+    // faulty is sent as username e.g.: "!who"
+    while (!check) {
         // create socket
         sockfd = sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
@@ -127,19 +114,25 @@ void Client::createSocketAndLogIn() {
 
         // connect socket with server
         connectToServer(sockfd, res);
-}
+
+        cout << "Input your name: " << endl;
+        getline(cin, username);
+
+        // check if typed "HELLO-FROM" in username
+        if (username.find(message) != std::string::npos) {
+            result = username + "\n";
+        }
+
+        else{
+            result = message + username + "\n";
+        }
+
+        // check if login to server is successful
+        check = recvFromServer(result, sockfd, res, username);
+
+    }
 
 
-bool Client::sendToServer(string result, int sockfd, addrinfo *res) {
-
-    // make a const char of the string, because send function expects a char as message
-    const char *message = result.c_str();
-
-    int length = strlen(message);
-    // send client message to server
-    int test = send(sockfd, message, length, res->ai_flags);
-
-    return true;
 }
 
 /**
@@ -148,29 +141,50 @@ bool Client::sendToServer(string result, int sockfd, addrinfo *res) {
  * @param sockfd
  * @param res
  */
-string Client::recvFromServer(int sockfd, addrinfo *res, string username) {
+bool Client::recvFromServer(string result, int sockfd, addrinfo *res, string username) {
+    // make a const char of the string, because send function expects a char as message
+    const char *message = result.c_str();
+
+    int length = strlen(message);
+
+    // send client message to server
+    send(sockfd, message, length, res->ai_flags);
+
     // receive message from server
     char buf[512];
 
-    recv(sockfd, buf, sizeof(buf), 0);
+    recv(sockfd, buf, sizeof(buf), res->ai_flags);
 
-    string result;
+//    const char *buffering = buf;
+
+//    cout << "buffering variable " << buffering << endl;
+
+//    socketBuffer.writeChars(buffering, sizeof(buffering));
+
+//    string print = socketBuffer.readLine();
+
+//    cout << print << "readline" << endl;
+//    cout << socketBuffer.freeSpace() << "free space" << endl;
+
+//    socketBuffer.readLine();
+
     if (strncmp("IN-USE\n", buf, 6) == 0) {
         cout << "Username \"" << username << "\" in use. Choose another username. " << endl;
-        return "";
+        return false;
     }
 
     else if (strncmp("BAD-RQST-BODY", buf, 6) == 0) {
         cout << "Username \"" << username << "\" bad request body." << endl;
-        return "";
+        return false;
     }
 
     else if(strncmp("UNKNOWN", buf, 6) == 0) {
         cout << "Unknown username. try a valid username." << endl;
     }
 
+
     else if (strncmp("SEND-OK", buf, 6) == 0){
-//        cout << "Server: " << buf << endl;
+        cout << "Server: " << buf << endl;
         recv(sockfd, buf, sizeof(buf), res->ai_flags);
 
         string receive;
@@ -181,16 +195,13 @@ string Client::recvFromServer(int sockfd, addrinfo *res, string username) {
         if(receive == "y"){
             cout << "Server: " << buf << endl;
         }
-        result = buf;
     }
 
     else {
-        result = buf;
-//        cout << "Client: " << result << endl;
-//        cout << "Server: " << buf << endl;
+        cout << "Client: " << result << endl;
+        cout << "Server: " << buf << endl;
+        return true;
     }
-
-    return result;
 }
 
 /**
