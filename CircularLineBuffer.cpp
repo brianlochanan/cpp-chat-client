@@ -6,7 +6,9 @@
 
 using namespace std;
 
-int newIndex;
+int newIndex = 0;
+
+string test;
 
 /**
  * Checks until '\n' is found and then writes to the buffer.
@@ -20,6 +22,7 @@ bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
 //    if(nchars > freeSpace()){
 //        return false;
 //    }
+
 
     // checks if size of characters is greater than what can be put inside the buffer.
     if(nchars > bufferSize){
@@ -36,7 +39,6 @@ bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
 
     //
     if(freeSpace() <= nchars){
-
         start = bufferSize - freeSpace();
         count = 0;
     }
@@ -44,7 +46,6 @@ bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
     // set the start variable at the new index that has not been taken.
     // Loop nchar times so that it can write the char.
     for (int j = nextFreeIndex(); j < (nchars + nextFreeIndex()); j++) {
-
         // check for '\n'.
         char endline = chars[i];
         endline += chars[i+1];
@@ -64,19 +65,24 @@ bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
             count++;
 
             // 1.2. the new slot that has not been taken is j+1, because the last j is the '\n'. See comment 1.1.
-            newIndex = j+1;
+//            newIndex = j+1;
 
             // check if the line that was the first in the line was overwritten. If yes then overwrite the start variable
             // with the new start variable.
+
             if(start <= j){
-                start = newIndex - nchars;
+                cout << "hdhf";
+                start = nextFreeIndex() - nchars;
             }
             return true;
         }
 
         // write chars to the buffer.
         else{
+
             buffer[j] = chars[i];
+//            cout << chars[i] << endl;
+
             i++;
 
             // count how many chars have been written to the buffer.
@@ -102,7 +108,7 @@ std::string CircularLineBuffer::_readLine() {
         // through all of the lines again.
         if(buffer[start++] == '\n'){
             count = count - start;
-            line = line.substr(0, line.size() - 1); // remove the nextline character from message
+//            line = line.substr(0, line.size() - 1); // remove the nextline character from message
             return std::string(line);
         }
 
@@ -135,11 +141,11 @@ bool CircularLineBuffer::isEmpty() {
 }
 
 int CircularLineBuffer::nextFreeIndex() {
-    return newIndex;
+    return start+count;
 }
 
 int CircularLineBuffer::findNewline() {
-    for (int i = newIndex-1; i-1 < bufferSize; i++) {
+    for (int i = nextFreeIndex()-1; i-1 < bufferSize; i++) {
         if(buffer[i] == '\n'){
             return i;
         }
@@ -148,8 +154,11 @@ int CircularLineBuffer::findNewline() {
 }
 
 bool CircularLineBuffer::hasLine() {
-    for (int i = start; i < strlen(buffer); i++) {
+
+    for (int i = start; i <= strlen(buffer); i++) {
+
         if(buffer[i] == '\n'){
+
             return true;
         }
     }
