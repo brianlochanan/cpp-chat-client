@@ -22,7 +22,7 @@ private:
      * You may increase the size of the buffer, if you want. :)
      * Reducing the size of the buffer allows for easier debugging.
      */
-    static const int bufferSize = 100000;
+    static const int bufferSize = 4096;
     char buffer[bufferSize] = {0};
 
     /**
@@ -123,9 +123,13 @@ public:
      * @return False if there was not enough space in the buffer. True otherwise.
      */
     inline bool writeChars(const char *chars, size_t nchars) {
+        std::cout << "test";
         mtx.lock();
+        std::cout << "test";
         auto res = _writeChars(chars, nchars);
+        std::cout << "test";
         mtx.unlock();
+        std::cout << "test";
         return res;
     }
 

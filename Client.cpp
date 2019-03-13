@@ -11,17 +11,21 @@
 using namespace std;
 
 // declare variables
+
+// check for login into the server
 bool firsTime = true;
 string command;
+string username;
+string result;
+
+// for the connection with the socket
 struct addrinfo hints, *res;
 struct addrinfo *info;
-string check = "0";
-string username;
 int sockfd;
-string result;
+
+// asynchronous buffering
 CircularLineBuffer* stdinBuffer = new CircularLineBuffer();
 CircularLineBuffer* socketBuffer = new CircularLineBuffer();
-string serverRead;
 
 int Client::tick() {
 
@@ -40,15 +44,6 @@ int Client::tick() {
 
 }
 
-int Client::readFromSocket() {
-    string receiveServer = recvFromServer(sockfd, res, username);
-    const char *message = receiveServer.c_str();
-
-    cout << "writing to socketBuffer.." << endl;
-    socketBuffer.writeChars(message, strlen(message));
-    return 0;
-}
-
 int Client::readFromStdin() {
     if(firsTime){
         cout << "Type a username: " << endl;
@@ -64,7 +59,7 @@ int Client::readFromStdin() {
         }
 
         else{
-            result = hellofromMessage + username + "\n";
+            result = hellofromMessage + username + '\n';
         }
 
         firsTime = false;
@@ -96,11 +91,28 @@ int Client::readFromStdin() {
     }
 
     const char *message = result.c_str();
-    cout << "writing to stdinBuffer.." << endl;
+
+//    cout << "message: " << message;
+
+//    cout << "result" << result;
+
+//    cout << "writing to stdinBuffer..";
     stdinBuffer.writeChars(message, strlen(message));
 
+    return 1;
+}
 
-    return 0;
+int Client::readFromSocket() {
+
+    cout << "jf" << endl;
+    string receiveServer = recvFromServer(sockfd, res, username);
+    cout << receiveServer;
+    const char *message = receiveServer.c_str();
+
+    cout << "message: " <<  message;
+    cout << "writing to socketBuffer.." << endl;
+    socketBuffer.writeChars(message, strlen(message));
+    return 1;
 }
 
 void Client::createSocketAndLogIn() {
@@ -152,7 +164,7 @@ string Client::recvFromServer(int sockfd, addrinfo *res, string username) {
     // receive message from server
     char buf[512];
 
-    recv(sockfd, buf, sizeof(buf), 0);
+    recv(sockfd, buf, sizeof(buf), res->ai_flags);
 
     string result;
     if (strncmp("IN-USE\n", buf, 6) == 0) {
