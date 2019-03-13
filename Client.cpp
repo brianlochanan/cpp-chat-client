@@ -102,7 +102,6 @@ int Client::readFromStdin() {
 int Client::readFromSocket() {
 
     string receiveServer = recvFromServer(sockfd, res, username);
-    cout << receiveServer;
     const char *message = receiveServer.c_str();
 
     cout << "writing to socketBuffer.." << endl;
