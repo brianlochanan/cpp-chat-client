@@ -38,6 +38,8 @@ int Client::tick() {
     if(socketBuffer.hasLine()){
         string command = socketBuffer.readLine();
         cout << "socketBuffer.readLine():" << command << endl;
+
+        cout << "Type a command: " << endl;
     }
 
     return 0;
@@ -65,7 +67,6 @@ int Client::readFromStdin() {
         firsTime = false;
     }
     else{
-        cout << "Type a command: " << endl;
         command = "";
         getline(cin, command);
         command = command;
@@ -103,7 +104,7 @@ int Client::readFromSocket() {
     string receiveServer = recvFromServer(sockfd, res, username);
     cout << receiveServer;
     const char *message = receiveServer.c_str();
-    
+
     cout << "writing to socketBuffer.." << endl;
     socketBuffer.writeChars(message, strlen(message));
     return 1;

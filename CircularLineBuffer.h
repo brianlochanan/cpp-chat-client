@@ -22,7 +22,7 @@ private:
      * You may increase the size of the buffer, if you want. :)
      * Reducing the size of the buffer allows for easier debugging.
      */
-    static const int bufferSize = 4096;
+    static const int bufferSize = 500;
     char buffer[bufferSize] = {0};
 
     /**
