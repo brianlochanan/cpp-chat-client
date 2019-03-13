@@ -27,19 +27,19 @@ bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
     }
 
     int j = 0;
-    int next = nextFreeIndex();
-    int untilNext = int(nchars) + next ;
 
-    cout << "nextFreeIndex(): " << nextFreeIndex() << endl;
+    int next = nextFreeIndex();
+
+    if(nextFreeIndex() >= bufferSize){
+        next = nextFreeIndex() - bufferSize;
+    }
+
+    int untilNext = int(nchars) + next;
+
+    cout << "next: " << next << endl;
     cout << "untilNext: " << untilNext << endl;
 
-    for (int i = nextFreeIndex(); i < untilNext; i++) {
-
-        // circle through buffer.
-        if(i >= bufferSize){
-            i = 0;
-            untilNext = untilNext - bufferSize-1;
-        }
+    for (int i = next; i < untilNext; i++) {
 
         // 1.2. extra check in case if the last character of buffer equals '\n' then take the next free space.
         // This can be done, because the array is not full because we already checked for it in 1.1.
@@ -47,7 +47,14 @@ bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
             ++i;
         }
         buffer[i] = chars[j++];
+
+        // circle through buffer.
+        if(i >= bufferSize){
+            i = -1;
+            untilNext = untilNext - bufferSize;
+        }
     }
+
     count += nchars;
     return true;
 }
@@ -58,6 +65,10 @@ bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
  */
 std::string CircularLineBuffer::_readLine() {
     string line;
+
+    if(start > bufferSize){
+        start -= bufferSize;
+    }
 
     // assign the current start to the start that is now the current start.
     int currentStart = start;
@@ -71,14 +82,13 @@ std::string CircularLineBuffer::_readLine() {
 
         // 2.2 do this before checking if the buffer is circular, because we must set the last character in the array
         // and not skip it.
-
         line += buffer[i];
 
         // 2.1 check if the buffer is circular and set the value of i to 0, so that we can start from the beginning
         // also set the start variable to the new beginning variable by start - bufferSize-1.
         if(i == bufferSize){
             i = -1;
-            start = start - bufferSize-1;
+            start = start - bufferSize;
         }
     }
     return std::string(line);
@@ -105,6 +115,9 @@ bool CircularLineBuffer::isEmpty() {
 }
 
 int CircularLineBuffer::nextFreeIndex() {
+//    if((start+count) >= bufferSize){
+//        return start+count-bufferSize;
+//    }
     return (start+count);
 }
 
@@ -120,6 +133,10 @@ int CircularLineBuffer::findNewline() {
 bool CircularLineBuffer::hasLine() {
 
     for (int i = start; i < nextFreeIndex()+1; i++) {
+
+        if(i >= bufferSize){
+            i = 0;
+        }
 
         if(buffer[i] == '\n'){
             return true;
