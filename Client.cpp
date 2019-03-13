@@ -37,8 +37,7 @@ int Client::tick() {
 
     if(socketBuffer.hasLine()){
         string command = socketBuffer.readLine();
-        cout << "socketBuffer.readLine():" << command << endl;
-
+        cout << "Server: " << command << endl;
         cout << "Type a command: " << endl;
     }
 
@@ -156,7 +155,7 @@ bool Client::sendToServer(string result, int sockfd, addrinfo *res) {
  */
 string Client::recvFromServer(int sockfd, addrinfo *res, string username) {
     // receive message from server
-    char buf[512];
+    char buf[4096];
 
     recv(sockfd, buf, sizeof(buf), res->ai_flags);
 
@@ -176,24 +175,11 @@ string Client::recvFromServer(int sockfd, addrinfo *res, string username) {
     }
 
     else if (strncmp("SEND-OK", buf, 6) == 0){
-//        cout << "Server: " << buf << endl;
-        recv(sockfd, buf, sizeof(buf), res->ai_flags);
-
-        string receive;
-
-        cout << "Would you like to receive the message back that you sent? y/n" << endl;
-        getline(cin, receive);
-
-        if(receive == "y"){
-            cout << "Server: " << buf << endl;
-        }
-        result = buf;
     }
 
     else {
         result = buf;
-//        cout << "Client: " << result << endl;
-//        cout << "Server: " << buf << endl;
+        cout << "Server: " << buf << endl;
     }
 
     return result;
