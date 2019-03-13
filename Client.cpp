@@ -92,11 +92,7 @@ int Client::readFromStdin() {
 
     const char *message = result.c_str();
 
-//    cout << "message: " << message;
-
-//    cout << "result" << result;
-
-//    cout << "writing to stdinBuffer..";
+    cout << "writing to stdinBuffer..";
     stdinBuffer.writeChars(message, strlen(message));
 
     return 1;
@@ -104,12 +100,10 @@ int Client::readFromStdin() {
 
 int Client::readFromSocket() {
 
-    cout << "jf" << endl;
     string receiveServer = recvFromServer(sockfd, res, username);
     cout << receiveServer;
     const char *message = receiveServer.c_str();
-
-    cout << "message: " <<  message;
+    
     cout << "writing to socketBuffer.." << endl;
     socketBuffer.writeChars(message, strlen(message));
     return 1;

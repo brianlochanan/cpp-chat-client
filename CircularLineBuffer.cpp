@@ -14,8 +14,6 @@ using namespace std;
  */
 bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
 
-    cout << "test";
-
     // checks if size of characters is greater than what can be put inside the buffer.
     if(nchars > bufferSize-1){
         return false;

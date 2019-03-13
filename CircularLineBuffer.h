@@ -123,13 +123,9 @@ public:
      * @return False if there was not enough space in the buffer. True otherwise.
      */
     inline bool writeChars(const char *chars, size_t nchars) {
-        std::cout << "test";
         mtx.lock();
-        std::cout << "test";
         auto res = _writeChars(chars, nchars);
-        std::cout << "test";
         mtx.unlock();
-        std::cout << "test";
         return res;
     }
 
