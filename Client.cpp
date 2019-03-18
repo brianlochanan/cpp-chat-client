@@ -5,9 +5,11 @@
 #include <sys/proc_info.h>
 #include "Client.h"
 
-#define PORT "5378"
-#define SERVER_IP "52.58.97.202"
+//#define PORT "5378"
+//#define SERVER_IP "52.58.97.202"
 
+#define PORT "8080"
+#define SERVER_IP "127.0.0.1"
 using namespace std;
 
 // declare variables
@@ -69,7 +71,7 @@ int Client::readFromStdin() {
         command = "";
         getline(cin, command);
         command = command;
-    }
+
 
     if (command == "!who") {
         result = "WHO\n";
@@ -81,18 +83,22 @@ int Client::readFromStdin() {
 
     // stop the application
     else if (command == "!quit") {
+        cout << "quitting program" << endl;
         // after connection free up memory
         freeaddrinfo(res);
         //close socket
+        closeSocket();
         sock_close(sockfd);
         sock_quit();
         this->stopApplication();
         return -1;
     }
-
+    else {
+        result = "falsecommand\n";
+    }
+    }
     const char *message = result.c_str();
 
-    cout << "writing to stdinBuffer..";
     stdinBuffer.writeChars(message, strlen(message));
 
     return 1;
@@ -101,9 +107,9 @@ int Client::readFromStdin() {
 int Client::readFromSocket() {
 
     string receiveServer = recvFromServer(sockfd, res, username);
+
     const char *message = receiveServer.c_str();
 
-    cout << "writing to socketBuffer.." << endl;
     socketBuffer.writeChars(message, strlen(message));
     return 1;
 }
@@ -160,26 +166,25 @@ string Client::recvFromServer(int sockfd, addrinfo *res, string username) {
     recv(sockfd, buf, sizeof(buf), res->ai_flags);
 
     string result;
-    if (strncmp("IN-USE\n", buf, 6) == 0) {
+    if (strncmp("IN-USE\n", buf, 7) == 0) {
         cout << "Username \"" << username << "\" in use. Choose another username. " << endl;
         return "";
     }
 
-    else if (strncmp("BAD-RQST-BODY", buf, 6) == 0) {
-        cout << "Username \"" << username << "\" bad request body." << endl;
+    else if (strncmp("BAD-RQST-BODY\n", buf, 14) == 0) {
+        cout << "Username \"" << username << "\"has a bad request body." << endl;
         return "";
     }
 
-    else if(strncmp("UNKNOWN", buf, 6) == 0) {
+    else if(strncmp("UNKNOWN\n", buf, 8) == 0) {
         cout << "Unknown username. try a valid username." << endl;
     }
 
-    else if (strncmp("SEND-OK", buf, 6) == 0){
+    else if (strncmp("SEND-OK\n", buf, 8) == 0){
     }
 
     else {
         result = buf;
-        cout << "Server: " << buf << endl;
     }
 
     return result;
@@ -193,11 +198,15 @@ void Client::connectToServer(int sockfd, addrinfo *res) {
     int conn = connect(sockfd, res->ai_addr, res->ai_addrlen);
     if (conn <= -1) {
         cout << "Connection to server failed" << endl;
+        closeSocket();
     }
 }
 
 void Client::closeSocket() {
-
+    //close socket
+    sock_close(sockfd);
+    sock_quit();
+    this->stopApplication();
 }
 
 

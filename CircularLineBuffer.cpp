@@ -36,9 +36,6 @@ bool CircularLineBuffer::_writeChars(const char *chars, size_t nchars) {
 
     int untilNext = int(nchars) + next;
 
-    cout << "next: " << next << endl;
-    cout << "untilNext: " << untilNext << endl;
-
     for (int i = next; i < untilNext; i++) {
 
         // 1.2. extra check in case if the last character of buffer equals '\n' then take the next free space.
