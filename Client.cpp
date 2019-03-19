@@ -49,29 +49,12 @@ int Client::tick() {
 
 int Client::readFromStdin() {
     if(firsTime){
-        cout << "Type a username: " << endl;
-        command = "";
-        getline(cin, command);
-        username = command;
-
-        char *hellofromMessage = "HELLO-FROM ";
-
-        // check if typed "HELLO-FROM" in username
-        if (username.find(hellofromMessage) != std::string::npos) {
-            result = username + '\n';
-        }
-
-        else{
-            result = hellofromMessage + username + '\n';
-        }
-
+        cout << "Type a command: " << endl;
         firsTime = false;
     }
-    else{
-        command = "";
-        getline(cin, command);
-        command = command;
-
+    command = "";
+    getline(cin, command);
+    command = command;
 
     if (command == "!who") {
         result = "WHO\n";
@@ -94,9 +77,22 @@ int Client::readFromStdin() {
         return -1;
     }
     else {
-        result = "falsecommand\n";
+
+        username = command;
+
+        char *hellofromMessage = "HELLO-FROM ";
+
+        // check if typed "HELLO-FROM" in username
+        if (username.find(hellofromMessage) != std::string::npos) {
+            result = username + '\n';
+        }
+
+        else{
+            result = hellofromMessage + username + '\n';
+        }
+        // result = "falsecommand\n";
     }
-    }
+    
     const char *message = result.c_str();
 
     stdinBuffer.writeChars(message, strlen(message));
@@ -178,9 +174,6 @@ string Client::recvFromServer(int sockfd, addrinfo *res, string username) {
 
     else if(strncmp("UNKNOWN\n", buf, 8) == 0) {
         cout << "Unknown username. try a valid username." << endl;
-    }
-
-    else if (strncmp("SEND-OK\n", buf, 8) == 0){
     }
 
     else {
