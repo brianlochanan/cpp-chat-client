@@ -34,7 +34,6 @@ int Client::tick() {
     if(stdinBuffer.hasLine()) {
         string command = stdinBuffer.readLine();
         sendToServer(command, sockfd, res);
-        cout << command;
     }
 
     if(socketBuffer.hasLine()){
@@ -174,6 +173,10 @@ string Client::recvFromServer(int sockfd, addrinfo *res, string username) {
 
     else if(strncmp("UNKNOWN\n", buf, 8) == 0) {
         cout << "Unknown username. try a valid username." << endl;
+    }
+    else if(strncmp("SEND-OK\n", buf, 8) == 0) {
+        const char *sendOk = "SEND-OK\n";
+        socketBuffer.writeChars(sendOk, strlen(sendOk));
     }
 
     else {
